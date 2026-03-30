@@ -396,8 +396,8 @@ body {
 
   .sun-system {
     width: min(34vw, 178px);
-    left: -1%;
-    top: 5%;
+    left: -2%;
+    top: 2%;
   }
 
   .stats-grid {
