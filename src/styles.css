@@ -156,14 +156,14 @@ body {
   text-align: center;
 }
 
-.hero h1 {
-  margin: 0;
-  font-size: clamp(4rem, 12vw, 9rem);
-  line-height: 0.92;
-  font-weight: 780;
+.hero-title-wrap {
+  width: min(84vw, 860px);
+  height: clamp(104px, 18vw, 188px);
+  filter: drop-shadow(0 16px 54px rgba(33, 93, 173, 0.36));
+}
+
+.hero-title-wrap .text-pressure-title {
   letter-spacing: -0.065em;
-  color: #fafdff;
-  text-shadow: 0 16px 54px rgba(33, 93, 173, 0.36);
 }
 
 .hero p {
@@ -279,6 +279,12 @@ body {
   font-weight: 600;
   background: rgba(255, 255, 255, 0.16);
   cursor: pointer;
+  box-shadow: 0 8px 18px rgba(14, 54, 96, 0.2);
+  transition:
+    transform 180ms ease,
+    box-shadow 220ms ease,
+    border-color 220ms ease,
+    background-color 220ms ease;
 }
 
 .filters-actions button:disabled {
@@ -295,6 +301,11 @@ body {
 
 .stat-card {
   padding: 0.88rem 1rem;
+  will-change: transform;
+  transition:
+    transform 240ms ease,
+    box-shadow 260ms ease,
+    border-color 260ms ease;
 }
 
 .stat-card p {
@@ -309,6 +320,36 @@ body {
   margin: 0.42rem 0 0;
   font-size: clamp(1.45rem, 2.3vw, 2rem);
   letter-spacing: -0.03em;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .stat-card:hover {
+    transform: translateY(-8px);
+    border-color: rgba(255, 255, 255, 0.64);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.62),
+      inset 0 -16px 28px rgba(62, 140, 224, 0.17),
+      0 30px 52px rgba(22, 69, 122, 0.34);
+  }
+
+  .filters-actions button:hover:not(:disabled) {
+    transform: translateY(-4px);
+    border-color: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.22);
+    box-shadow: 0 14px 26px rgba(12, 53, 95, 0.3);
+  }
+}
+
+.filters-actions button:active:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 7px 14px rgba(12, 53, 95, 0.22);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stat-card,
+  .filters-actions button {
+    transition: none;
+  }
 }
 
 .map-panel {
@@ -398,6 +439,11 @@ body {
     width: min(34vw, 178px);
     left: -2%;
     top: 2%;
+  }
+
+  .hero-title-wrap {
+    width: min(88vw, 660px);
+    height: clamp(88px, 22vw, 128px);
   }
 
   .stats-grid {

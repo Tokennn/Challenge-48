@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
+import TextPressure from './components/TextPressure';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -62,6 +63,7 @@ function App() {
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const markerLayerRef = useRef(null);
+  const lenisRef = useRef(null);
 
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [readings, setReadings] = useState([]);
@@ -102,6 +104,7 @@ function App() {
       wheelMultiplier: 0.95,
       touchMultiplier: 1.1,
     });
+    lenisRef.current = lenis;
 
     lenis.on('scroll', ScrollTrigger.update);
 
@@ -157,6 +160,7 @@ function App() {
     return () => {
       ctx.revert();
       lenis.destroy();
+      lenisRef.current = null;
     };
   }, []);
 
@@ -290,6 +294,24 @@ function App() {
     fetchReadings(DEFAULT_FILTERS);
   }
 
+  function onScrollIndicatorClick(event) {
+    event.preventDefault();
+
+    if (lenisRef.current) {
+      lenisRef.current.scrollTo('#dashboard', {
+        duration: 1.18,
+        easing: (value) => 1 - (1 - value) ** 3,
+      });
+      return;
+    }
+
+    const target = document.getElementById('dashboard');
+    target?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+  }
+
   return (
     <div className="app" ref={appRef}>
       <div className="sky-noise" aria-hidden="true" />
@@ -308,9 +330,30 @@ function App() {
       </div>
 
       <header className="hero">
-        <h1 ref={titleRef}>Air map</h1>
-        <p>Prototype technique: API filtrable, worker cyclique, cartographie dynamique.</p>
-        <a className="scroll-indicator" href="#dashboard" aria-label="Descendre">
+        <div ref={titleRef} className="hero-title-wrap">
+          <TextPressure
+            text="Air map"
+            flex={false}
+            alpha={false}
+            stroke={false}
+            width={false}
+            weight
+            italic={false}
+            fontFamily='"SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+            fontUrl=""
+            loadFont={false}
+            textColor="#fafdff"
+            strokeColor="#5aa7ff"
+            minFontSize={64}
+          />
+        </div>
+        {/* <p>Prototype technique: API filtrable, worker cyclique, cartographie dynamique.</p> */}
+        <a
+          className="scroll-indicator"
+          href="#dashboard"
+          aria-label="Descendre"
+          onClick={onScrollIndicatorClick}
+        >
           ↓
         </a>
       </header>
@@ -464,7 +507,7 @@ function App() {
 
           <div className="panel map-panel reveal-item">
             <div className="map-header">
-              <h2>Carte AQI (Leaflet)</h2>
+              <h2>Carte</h2>
               <p>
                 {meta?.returned ?? 0} points • mode{' '}
                 {meta?.mode === 'city' ? 'moyenne par ville' : 'brut'} • mise à
