@@ -58,7 +58,7 @@ function App() {
   const titleRef = useRef(null);
   const sunRef = useRef(null);
   const sunGlowRef = useRef(null);
-  const sunRaysRef = useRef(null);
+  const sunFlareRef = useRef(null);
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const markerLayerRef = useRef(null);
@@ -114,11 +114,14 @@ function App() {
         ease: 'power3.out',
       });
 
-      gsap.to(sunRaysRef.current, {
-        rotate: 360,
-        duration: 70,
+      gsap.to(sunFlareRef.current, {
+        rotate: 7,
+        x: 12,
+        y: 8,
+        duration: 8,
         repeat: -1,
-        ease: 'none',
+        yoyo: true,
+        ease: 'sine.inOut',
       });
 
       gsap.to(sunGlowRef.current, {
@@ -292,13 +295,15 @@ function App() {
       <div className="sky-noise" aria-hidden="true" />
 
       <div className="sun-system" aria-hidden="true" ref={sunRef}>
-        <div className="sun-glow" ref={sunGlowRef} />
-        <div className="sun-rings" />
-        <div className="sun-core" />
-        <div className="sun-rays" ref={sunRaysRef}>
-          {[...Array(12)].map((_, index) => (
-            <span key={index} style={{ '--i': index }} />
+        <div className="sun-aura" ref={sunGlowRef} />
+        <div className="sun-bloom" />
+        <div className="sun-disc" />
+        <div className="sun-flare" ref={sunFlareRef}>
+          {[1, 2, 3].map((value) => (
+            <span key={`orb-${value}`} className={`flare-orb flare-orb-${value}`} />
           ))}
+          <span className="flare-arc flare-arc-1" />
+          <span className="flare-arc flare-arc-2" />
         </div>
       </div>
 

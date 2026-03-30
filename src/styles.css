@@ -1,7 +1,7 @@
 :root {
-  --sky-top: #9fd5ff;
-  --sky-middle: #76beff;
-  --sky-bottom: #58a7f2;
+  --sky-top: #8eb4df;
+  --sky-middle: #5f94cc;
+  --sky-bottom: #3f78b9;
   --text-main: #f7fbff;
   --panel-border: rgba(255, 255, 255, 0.46);
   --panel-fill: rgba(255, 255, 255, 0.19);
@@ -23,7 +23,9 @@ body,
 body {
   font-family: "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: var(--text-main);
-  background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-middle) 44%, var(--sky-bottom) 100%);
+  background:
+    radial-gradient(circle at 12% 7%, rgba(255, 255, 255, 0.58), transparent 22%),
+    linear-gradient(180deg, var(--sky-top) 0%, var(--sky-middle) 44%, var(--sky-bottom) 100%);
   overflow-x: hidden;
 }
 
@@ -37,73 +39,107 @@ body {
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.24;
+  opacity: 0.2;
   background-image:
-    radial-gradient(circle at 18% 24%, rgba(255, 255, 255, 0.35), transparent 28%),
-    radial-gradient(circle at 72% 33%, rgba(255, 255, 255, 0.2), transparent 38%),
-    radial-gradient(circle at 50% 72%, rgba(255, 255, 255, 0.14), transparent 42%);
+    radial-gradient(circle at 9% 16%, rgba(255, 255, 255, 0.45), transparent 24%),
+    radial-gradient(circle at 17% 42%, rgba(153, 228, 255, 0.2), transparent 32%),
+    radial-gradient(circle at 47% 58%, rgba(255, 255, 255, 0.13), transparent 36%);
 }
 
 .sun-system {
   position: fixed;
-  top: 4%;
-  left: 3%;
-  width: min(26vw, 220px);
+  top: 2.6%;
+  left: 1%;
+  width: min(34vw, 280px);
   aspect-ratio: 1;
   pointer-events: none;
   z-index: 1;
   will-change: transform;
 }
 
-.sun-glow {
+.sun-aura {
   position: absolute;
-  inset: -36%;
+  inset: -56%;
   border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(255, 242, 192, 0.74) 0%,
-    rgba(255, 209, 109, 0.48) 38%,
-    rgba(255, 192, 79, 0.13) 64%,
-    transparent 74%
-  );
-  filter: blur(18px);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.94) 0%, rgba(255, 251, 224, 0.52) 38%, rgba(255, 245, 198, 0.18) 63%, transparent 74%);
+  filter: blur(15px);
 }
 
-.sun-rings {
+.sun-bloom {
   position: absolute;
-  inset: -14%;
+  inset: -24%;
   border-radius: 50%;
-  border: 1px solid rgba(255, 246, 201, 0.25);
-  box-shadow: 0 0 42px rgba(255, 190, 58, 0.2);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.42) 0%, rgba(255, 255, 255, 0.08) 54%, transparent 72%);
+  filter: blur(7px);
 }
 
-.sun-core {
+.sun-disc {
   position: absolute;
-  inset: 17%;
+  inset: 22%;
   border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, #fffbea 0%, #ffe28f 36%, #ffc44d 63%, #fca921 100%);
+  background: radial-gradient(circle at 34% 33%, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.97) 43%, rgba(248, 243, 217, 0.8) 68%, rgba(245, 223, 154, 0.2) 100%);
   box-shadow:
-    inset 0 2px 8px rgba(255, 255, 244, 0.55),
-    0 0 26px rgba(255, 196, 72, 0.72),
-    0 0 64px rgba(255, 177, 29, 0.45);
+    inset 0 0 18px rgba(255, 255, 255, 0.75),
+    0 0 52px rgba(255, 255, 255, 0.82),
+    0 0 84px rgba(255, 233, 182, 0.38);
 }
 
-.sun-rays {
+.sun-flare {
   position: absolute;
-  inset: 0;
+  inset: -6%;
+  border-radius: 50%;
+  mix-blend-mode: screen;
+  opacity: 0.95;
 }
 
-.sun-rays span {
+.flare-orb,
+.flare-arc {
   position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 2px;
-  height: 24%;
-  border-radius: 99px;
-  background: linear-gradient(to top, rgba(255, 223, 134, 0), rgba(255, 236, 168, 0.88));
-  transform-origin: center 100%;
-  transform: translate(-50%, -100%) rotate(calc(var(--i) * 30deg));
-  opacity: 0.78;
+  border-radius: 50%;
+}
+
+.flare-orb {
+  background: radial-gradient(circle, rgba(214, 249, 255, 0.34) 0%, rgba(255, 255, 255, 0.12) 52%, transparent 70%);
+  filter: blur(0.4px);
+}
+
+.flare-orb-1 {
+  width: 24%;
+  aspect-ratio: 1;
+  left: 67%;
+  top: 67%;
+}
+
+.flare-orb-2 {
+  width: 14%;
+  aspect-ratio: 1;
+  left: 59%;
+  top: 56%;
+}
+
+.flare-orb-3 {
+  width: 34%;
+  aspect-ratio: 1;
+  left: 19%;
+  top: 35%;
+}
+
+.flare-arc {
+  position: absolute;
+  border: 1px solid rgba(150, 222, 255, 0.36);
+  background: transparent;
+  filter: blur(0.2px);
+}
+
+.flare-arc-1 {
+  inset: 26% 20%;
+  transform: rotate(-14deg);
+}
+
+.flare-arc-2 {
+  inset: 16% 10%;
+  border-color: rgba(173, 235, 255, 0.28);
+  transform: rotate(-18deg);
 }
 
 .hero,
