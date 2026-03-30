@@ -60,6 +60,9 @@ function App() {
   const sunRef = useRef(null);
   const sunGlowRef = useRef(null);
   const sunFlareRef = useRef(null);
+  const moonRef = useRef(null);
+  const moonAuraRef = useRef(null);
+  const mapPanelRef = useRef(null);
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const markerLayerRef = useRef(null);
@@ -95,6 +98,29 @@ function App() {
       zoneCount,
     };
   }, [readings]);
+
+  const starField = useMemo(
+    () =>
+      Array.from({ length: 48 }, (_, index) => {
+        const x = (index * 37 + 13) % 100;
+        const y = (index * 29 + 17) % 100;
+        const size = 2 + ((index * 11) % 4);
+        const delay = -((index * 0.43) % 5.2);
+        const duration = 3.8 + ((index * 0.27) % 2.8);
+        const opacity = 0.34 + ((index * 0.07) % 0.46);
+
+        return {
+          id: index + 1,
+          x,
+          y,
+          size,
+          delay,
+          duration,
+          opacity: opacity.toFixed(2),
+        };
+      }),
+    []
+  );
 
   useEffect(() => {
     const lenis = new Lenis({
@@ -144,6 +170,30 @@ function App() {
         ease: 'sine.inOut',
       });
 
+      gsap.set(moonRef.current, {
+        opacity: 0,
+        scale: 0.78,
+        x: 24,
+        y: 14,
+      });
+
+      gsap.to(moonRef.current, {
+        y: -7,
+        duration: 5.4,
+        repeat: -1,
+        yoyo: true,
+        ease: 'sine.inOut',
+      });
+
+      gsap.to(moonAuraRef.current, {
+        opacity: 0.74,
+        scale: 1.13,
+        duration: 4.6,
+        repeat: -1,
+        yoyo: true,
+        ease: 'sine.inOut',
+      });
+
       gsap.from('.reveal-item', {
         opacity: 0,
         y: 70,
@@ -155,6 +205,47 @@ function App() {
           start: 'top 78%',
         },
       });
+
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: mapPanelRef.current,
+          start: 'top 84%',
+          end: 'top 36%',
+          scrub: 1.2,
+        },
+      })
+        .to('.night-overlay', { opacity: 1, ease: 'none', duration: 1 }, 0)
+        .to(
+          sunRef.current,
+          {
+            opacity: 0.14,
+            scale: 0.8,
+            ease: 'none',
+            duration: 1,
+          },
+          0
+        )
+        .to(
+          sunGlowRef.current,
+          {
+            opacity: 0.08,
+            ease: 'none',
+            duration: 1,
+          },
+          0
+        )
+        .to(
+          moonRef.current,
+          {
+            opacity: 1,
+            scale: 1,
+            x: 0,
+            ease: 'none',
+            duration: 1,
+          },
+          0
+        )
+        .to('.sky-noise', { opacity: 0.34, ease: 'none', duration: 1 }, 0);
     }, appRef);
 
     return () => {
@@ -314,6 +405,24 @@ function App() {
 
   return (
     <div className="app" ref={appRef}>
+      <div className="night-overlay" aria-hidden="true">
+        <div className="night-stars">
+          {starField.map((star) => (
+            <span
+              key={`star-${star.id}`}
+              className="night-star"
+              style={{
+                '--star-x': `${star.x}%`,
+                '--star-y': `${star.y}%`,
+                '--star-size': `${star.size}px`,
+                '--star-delay': `${star.delay}s`,
+                '--star-duration': `${star.duration}s`,
+                '--star-opacity': star.opacity,
+              }}
+            />
+          ))}
+        </div>
+      </div>
       <div className="sky-noise" aria-hidden="true" />
 
       <div className="sun-system" aria-hidden="true" ref={sunRef}>
@@ -326,6 +435,19 @@ function App() {
           ))}
           <span className="flare-arc flare-arc-1" />
           <span className="flare-arc flare-arc-2" />
+        </div>
+      </div>
+
+      <div className="moon-system" aria-hidden="true" ref={moonRef}>
+        <div className="moon-aura" ref={moonAuraRef} />
+        <div className="moon-disc">
+          <span className="moon-rim" />
+          <span className="moon-marble moon-marble-1" />
+          <span className="moon-marble moon-marble-2" />
+          <span className="moon-marble moon-marble-3" />
+          <span className="moon-crater moon-crater-1" />
+          <span className="moon-crater moon-crater-2" />
+          <span className="moon-crater moon-crater-3" />
         </div>
       </div>
 
@@ -505,7 +627,7 @@ function App() {
             </article>
           </div>
 
-          <div className="panel map-panel reveal-item">
+          <div className="panel map-panel reveal-item" ref={mapPanelRef}>
             <div className="map-header">
               <h2>Carte</h2>
               <p>

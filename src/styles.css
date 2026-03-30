@@ -34,6 +34,48 @@ body {
   min-height: 210vh;
 }
 
+.night-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+  background:
+    radial-gradient(circle at 78% 8%, rgba(214, 229, 255, 0.13), transparent 30%),
+    radial-gradient(circle at 20% 18%, rgba(118, 159, 228, 0.14), transparent 44%),
+    linear-gradient(180deg, rgba(8, 15, 37, 0.88) 0%, rgba(8, 18, 42, 0.9) 42%, rgba(5, 12, 34, 0.94) 100%);
+}
+
+.night-stars {
+  position: absolute;
+  inset: 0;
+}
+
+.night-star {
+  position: absolute;
+  top: var(--star-y, 50%);
+  left: var(--star-x, 50%);
+  width: var(--star-size, 4px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  opacity: var(--star-opacity, 0.66);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.98) 0%, rgba(221, 236, 255, 0.8) 45%, transparent 78%);
+  box-shadow: 0 0 16px rgba(209, 228, 255, 0.4);
+  animation: star-twinkle var(--star-duration, 4.8s) ease-in-out infinite;
+  animation-delay: var(--star-delay, 0s);
+}
+
+@keyframes star-twinkle {
+  0%, 100% {
+    opacity: 0.22;
+    transform: scale(0.7);
+  }
+  50% {
+    opacity: 0.86;
+    transform: scale(1.12);
+  }
+}
+
 .sky-noise {
   position: fixed;
   inset: 0;
@@ -55,6 +97,101 @@ body {
   pointer-events: none;
   z-index: 1;
   will-change: transform;
+}
+
+.moon-system {
+  position: fixed;
+  top: 2.8%;
+  right: 1.6%;
+  width: min(32vw, 260px);
+  aspect-ratio: 1;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.moon-aura {
+  position: absolute;
+  inset: -56%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 24% 50%, rgba(196, 221, 255, 0.58) 0%, rgba(126, 173, 249, 0.24) 38%, rgba(100, 143, 220, 0.08) 58%, transparent 72%);
+  filter: blur(17px);
+}
+
+.moon-disc {
+  position: absolute;
+  inset: 24%;
+  border-radius: 50%;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 28% 30%, rgba(255, 255, 255, 0.56) 0%, transparent 34%),
+    radial-gradient(circle at 67% 66%, rgba(172, 194, 224, 0.32) 0%, transparent 36%),
+    radial-gradient(circle at 42% 49%, rgba(241, 247, 255, 0.95) 0%, rgba(211, 224, 242, 0.9) 54%, rgba(138, 163, 200, 0.64) 100%);
+  box-shadow:
+    inset -10px -10px 20px rgba(126, 151, 190, 0.34),
+    inset 10px 8px 20px rgba(255, 255, 255, 0.24),
+    0 0 42px rgba(168, 200, 252, 0.34),
+    0 0 78px rgba(130, 171, 245, 0.18);
+}
+
+.moon-rim {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 28%, rgba(255, 255, 255, 0.56) 0%, rgba(219, 233, 255, 0.22) 42%, transparent 72%);
+  mix-blend-mode: screen;
+}
+
+.moon-marble {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(0.2px);
+}
+
+.moon-marble-1 {
+  inset: 14% 54% 47% 12%;
+  background: radial-gradient(circle at 45% 60%, rgba(162, 188, 222, 0.42) 0%, rgba(162, 188, 222, 0.1) 62%, transparent 100%);
+}
+
+.moon-marble-2 {
+  inset: 46% 20% 14% 44%;
+  background: radial-gradient(circle at 35% 35%, rgba(142, 168, 202, 0.28) 0%, rgba(142, 168, 202, 0.08) 62%, transparent 100%);
+}
+
+.moon-marble-3 {
+  inset: 30% 32% 34% 38%;
+  background: radial-gradient(circle at 40% 56%, rgba(147, 174, 210, 0.3) 0%, rgba(147, 174, 210, 0.1) 64%, transparent 100%);
+}
+
+.moon-crater {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(132, 157, 196, 0.7) 0%, rgba(167, 187, 221, 0.26) 74%, transparent 100%);
+  box-shadow:
+    inset 1px 1px 3px rgba(229, 239, 255, 0.22),
+    inset -2px -2px 4px rgba(103, 128, 165, 0.3);
+}
+
+.moon-crater-1 {
+  width: 14%;
+  aspect-ratio: 1;
+  left: 17%;
+  top: 33%;
+}
+
+.moon-crater-2 {
+  width: 9%;
+  aspect-ratio: 1;
+  left: 56%;
+  top: 58%;
+}
+
+.moon-crater-3 {
+  width: 11%;
+  aspect-ratio: 1;
+  left: 58%;
+  top: 30%;
 }
 
 .sun-aura {
@@ -347,8 +484,10 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .stat-card,
-  .filters-actions button {
+  .filters-actions button,
+  .night-star {
     transition: none;
+    animation: none;
   }
 }
 
@@ -438,6 +577,12 @@ body {
   .sun-system {
     width: min(34vw, 178px);
     left: -2%;
+    top: 2%;
+  }
+
+  .moon-system {
+    width: min(34vw, 178px);
+    right: -2%;
     top: 2%;
   }
 
