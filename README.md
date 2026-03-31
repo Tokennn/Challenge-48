@@ -1,8 +1,9 @@
-# Air Map - Frontend + PostgreSQL (Base Vierge)
+# Air Map - Frontend + Backend
 
 Ce repo contient:
-- un frontend React/Vite (interface uniquement),
-- une base PostgreSQL vide, prête à être branchée à la future API data.
+- un frontend React/Vite,
+- un backend FastAPI dans `backend/`,
+- des assets/config pour le runtime Docker local.
 
 ## Technologies
 
@@ -62,9 +63,8 @@ Note: la DB est isolée sur son réseau interne Docker; en local elle est aussi 
 
 ## État actuel de la data
 
-- Le frontend n'appelle aucune API backend pour l'instant.
-- La base PostgreSQL est volontairement vide.
-- L’intégration avec l’API data sera ajoutée ensuite.
+- Le frontend appelle le backend pour charger les points de la carte.
+- Le backend interroge l’API data, persiste les mesures en PostgreSQL, puis expose les filtres.
 
 ## Commandes utiles
 

@@ -19,20 +19,22 @@ const DEFAULT_FILTERS = {
   limit: '300',
 };
 
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8787').replace(/\/$/, '');
+
 function getAqiColor(aqi) {
-  if (aqi <= 50) return '#38d67a';
-  if (aqi <= 100) return '#ffd449';
-  if (aqi <= 150) return '#ff9c38';
-  if (aqi <= 200) return '#ff5f5f';
-  return '#8b63ff';
+  if (aqi <= 20) return '#38d67a';
+  if (aqi <= 40) return '#8adf4a';
+  if (aqi <= 60) return '#ffd449';
+  if (aqi <= 80) return '#ff9c38';
+  return '#ff5f5f';
 }
 
 function getAqiLabel(aqi) {
-  if (aqi <= 50) return 'Bon';
-  if (aqi <= 100) return 'Modéré';
-  if (aqi <= 150) return 'Dégradé';
-  if (aqi <= 200) return 'Mauvais';
-  return 'Très mauvais';
+  if (aqi <= 20) return 'Très faible';
+  if (aqi <= 40) return 'Faible';
+  if (aqi <= 60) return 'Modéré';
+  if (aqi <= 80) return 'Élevé';
+  return 'Très élevé';
 }
 
 function escapeHtml(value) {
@@ -42,6 +44,39 @@ function escapeHtml(value) {
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#39;');
+}
+
+function InteractiveIndexCard() {
+  const [indexPreview, setIndexPreview] = useState(50);
+
+  function onIndexPreviewChange(event) {
+    setIndexPreview(Number(event.target.value));
+  }
+
+  return (
+    <article className="panel index-scale-card" aria-label="Indice interactif">
+      <p>Indice interactif (fictif)</p>
+      <h3>{indexPreview}</h3>
+      <small className="index-scale-note">N&apos;impacte pas les filtres ni les appels API.</small>
+      <div className="index-scale-track" aria-hidden="true" />
+      <input
+        className="index-scale-input"
+        type="range"
+        min="0"
+        max="100"
+        value={indexPreview}
+        onChange={onIndexPreviewChange}
+        aria-label="Ajuster l'indice"
+      />
+      <div className="index-scale-ticks" aria-hidden="true">
+        <span>0</span>
+        <span>25</span>
+        <span>50</span>
+        <span>75</span>
+        <span>100</span>
+      </div>
+    </article>
+  );
 }
 
 function App() {
@@ -340,19 +375,57 @@ function App() {
     });
   }, [mapReady, readings, meta?.mode]);
 
-  function fetchReadings(nextFilters) {
+  async function fetchReadings(nextFilters) {
     setLoading(true);
     setError('');
 
-    setReadings([]);
-    setMeta({
-      total: 0,
-      returned: 0,
-      mode: nextFilters.aggregateBy === 'city' ? 'city' : 'none',
-      generatedAt: new Date().toISOString(),
-      filters: nextFilters,
-    });
-    setLoading(false);
+    const params = new URLSearchParams();
+
+    if (nextFilters.startDate) params.set('start_date', nextFilters.startDate);
+    if (nextFilters.endDate) params.set('end_date', nextFilters.endDate);
+    if (nextFilters.minLat !== '') params.set('min_lat', nextFilters.minLat);
+    if (nextFilters.maxLat !== '') params.set('max_lat', nextFilters.maxLat);
+    if (nextFilters.minLng !== '') params.set('min_lng', nextFilters.minLng);
+    if (nextFilters.maxLng !== '') params.set('max_lng', nextFilters.maxLng);
+    if (nextFilters.minAqi !== '') params.set('min_index', nextFilters.minAqi);
+    if (nextFilters.maxAqi !== '') params.set('max_index', nextFilters.maxAqi);
+    if (nextFilters.aggregateBy) params.set('aggregate_by', nextFilters.aggregateBy);
+    if (nextFilters.limit) params.set('limit', nextFilters.limit);
+
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/v1/readings?${params.toString()}`,
+        { method: 'GET' }
+      );
+
+      if (!response.ok) {
+        throw new Error(`API backend indisponible (${response.status})`);
+      }
+
+      const payload = await response.json();
+      setReadings(Array.isArray(payload.items) ? payload.items : []);
+      setMeta(
+        payload.meta || {
+          total: 0,
+          returned: 0,
+          mode: nextFilters.aggregateBy === 'city' ? 'city' : 'none',
+          generatedAt: new Date().toISOString(),
+          filters: nextFilters,
+        }
+      );
+    } catch (fetchError) {
+      setReadings([]);
+      setMeta({
+        total: 0,
+        returned: 0,
+        mode: nextFilters.aggregateBy === 'city' ? 'city' : 'none',
+        generatedAt: new Date().toISOString(),
+        filters: nextFilters,
+      });
+      setError(fetchError instanceof Error ? fetchError.message : 'Erreur réseau');
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -543,7 +616,7 @@ function App() {
                 <input
                   type="number"
                   min="0"
-                  max="500"
+                  max="100"
                   name="minAqi"
                   value={filters.minAqi}
                   onChange={onFilterChange}
@@ -555,7 +628,7 @@ function App() {
                 <input
                   type="number"
                   min="0"
-                  max="500"
+                  max="100"
                   name="maxAqi"
                   value={filters.maxAqi}
                   onChange={onFilterChange}
@@ -595,6 +668,8 @@ function App() {
                 </button>
               </div>
             </form>
+
+            <InteractiveIndexCard />
           </div>
 
           <div className="stats-grid reveal-item">
@@ -639,10 +714,37 @@ function App() {
 
             <div ref={mapContainerRef} className="leaflet-map" />
           </div>
+
+          <article className="panel about-panel reveal-item">
+            <h2>À propos</h2>
+            <p>
+              <strong>Sources :</strong> les données sont issues de <strong>data.gouv.fr</strong> et de{' '}
+              <strong>GeoD&apos;Air</strong>.
+            </p>
+            <p>
+              <strong>Indice :</strong> l&apos;indice affiché sur la carte représente une fusion entre
+              les mesures de <strong>pollution</strong> et les conditions <strong>météorologiques</strong>,
+              pour donner un niveau synthétique et lisible de la qualité de l&apos;air.
+            </p>
+          </article>
         </section>
 
         <footer className="page-note">
           Projet réalisé dans le cadre du Challenge 48h
+          <div className="credits">
+            <a href="https://www.linkedin.com/in/romeo-bernard-666169292/" target="_blank" rel="noreferrer">
+              Bernard Romeo
+            </a>
+            <a href="https://www.linkedin.com/in/yehya-abou-khechfe-55b4a9387/" target="_blank" rel="noreferrer">
+              Abou Khechfe Yehya
+            </a>
+            <a href="https://quentincontreau.com/" target="_blank" rel="noreferrer">
+              Contreau Quentin
+            </a>
+            <a href="https://dyskolos.fr" target="_blank" rel="noreferrer">
+              Beuillé Baptiste
+            </a>
+          </div>
         </footer>
       </main>
     </div>
