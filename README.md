@@ -1,90 +1,89 @@
-# Air map - Base fullstack alignée barème (PostgreSQL)
+# Air Map - Frontend + PostgreSQL (Base Vierge)
 
-Cette base répond au process demandé:
-- backend + frontend,
-- récupération cyclique toutes les X minutes,
-- stockage PostgreSQL,
-- endpoint de restitution filtrable,
-- carte Leaflet avec cercles colorés + popup,
-- formulaire de filtres réactif.
+Ce repo contient:
+- un frontend React/Vite (interface uniquement),
+- une base PostgreSQL vide, prête à être branchée à la future API data.
 
-## Stack
-- Front: React, Vite, GSAP, Lenis, Leaflet (CDN)
-- Back: Node.js, Express
-- Base de données: PostgreSQL (`pg`)
+## Technologies
 
-## Démarrage rapide
+- Docker / Docker Compose
+- Frontend: React + Vite
+- UI/Anim: Leaflet (CDN), GSAP, Lenis
+- Base de données: PostgreSQL 16
 
-1. Démarrer PostgreSQL:
+## Prérequis
+
+Option recommandée:
+- Docker Desktop (ou Docker CLI + Docker Compose + runtime Docker)
+
+Option locale (non obligatoire):
+- Node.js 20+
+- npm 10+
+
+## Démarrage sur environnement vierge
+
+1. Copier les variables:
+```bash
+cp .env.example .env
+```
+
+2. Lancer la plateforme:
+```bash
+docker compose up --build -d
+```
+
+3. Accéder au frontend:
+- http://localhost:5173
+
+4. Vérifier PostgreSQL:
+```bash
+psql "postgresql://postgres:postgres@localhost:5432/air_map" -c "SELECT 1;"
+```
+
+## Variables d'environnement
+
+Voir `.env.example`:
+- frontend: `FRONTEND_PORT`, `VITE_APP_NAME`, `FRONTEND_CONTAINER_NAME`
+- postgres: `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_HOST_PORT`, `POSTGRES_CONTAINER_NAME`
+- future API/backend: `DATABASE_URL`
+
+## Architecture Docker locale
+
+- `frontend`:
+  - exposé sur `FRONTEND_PORT` (par défaut `5173`)
+- `postgres`:
+  - exposé localement sur `127.0.0.1:POSTGRES_HOST_PORT` (par défaut `5432`)
+  - volume persistant `postgres_data`
+- réseaux:
+  - `frontend_net`
+  - `backend_net`
+
+Note: la DB est isolée sur son réseau interne Docker; en local elle est aussi accessible en loopback pour debug (`127.0.0.1`).
+
+## État actuel de la data
+
+- Le frontend n'appelle aucune API backend pour l'instant.
+- La base PostgreSQL est volontairement vide.
+- L’intégration avec l’API data sera ajoutée ensuite.
+
+## Commandes utiles
+
+Arrêter:
+```bash
+docker compose stop
+```
+
+Relancer:
 ```bash
 docker compose up -d
 ```
 
-2. Installer les dépendances:
+Stop + suppression conteneurs:
 ```bash
-npm install
+docker compose down
 ```
 
-3. Lancer backend + frontend:
+Suppression conteneurs + volume DB:
 ```bash
-npm run dev:all
+docker compose down -v
 ```
-
-- Front: `http://localhost:5173`
-- API: `http://localhost:8787`
-
-## Variables d'environnement
-Copier `.env.example` vers `.env` puis adapter:
-
-- `DATABASE_URL=postgresql://postgres:postgres@localhost:5432/air_map`
-- `PORT=8787`
-- `WORKER_INTERVAL_MS=120000`
-- `ENABLE_WORKER=true`
-- `DATA_SOURCE_URL=`
-
-`DATA_SOURCE_URL` est optionnel.
-- si vide: le worker injecte des données mock,
-- si rempli: le worker interroge l'endpoint data team puis persiste les données.
-
-## Endpoints API
-
-### `GET /api/health`
-Santé API + infos worker + statut DB.
-
-### `GET /api/readings`
-Filtres disponibles:
-- `startDate`, `endDate` (`YYYY-MM-DD`)
-- `minLat`, `maxLat`, `minLng`, `maxLng`
-- `minAqi`, `maxAqi`
-- `limit`
-- `aggregateBy=city` pour restituer les indices moyens par ville
-
-Exemple:
-```bash
-curl "http://localhost:8787/api/readings?startDate=2026-03-20&endDate=2026-03-30&minLat=43&maxLat=49&minLng=1&maxLng=7&minAqi=30&maxAqi=180&aggregateBy=city&limit=100"
-```
-
-## Mapping avec ton barème
-
-1. **Consommation & Persistance**
-- Worker cyclique: `server/worker.js`
-- Persistance PostgreSQL + index: `server/db.js`
-
-2. **Backend & API Filtres**
-- Endpoint de restitution: `GET /api/readings`
-- Filtrage dates, zone géographique, bornes d'indice
-- Mode agrégé `aggregateBy=city` pour les indices moyens
-
-3. **Intégration Cartographique**
-- Carte Leaflet: `src/App.jsx`
-- Cercles avec indice affiché dedans (badge)
-- Popup au clic avec infos détaillées
-- Couleur liée à la valeur AQI
-
-4. **IHM & UX**
-- Formulaire complet de filtres
-- Mise à jour dynamique de la carte sans rechargement
-- États `loading`, `error`, `empty` + KPI
-
-## Bonus clustering
-Le clustering client/serveur n'est pas encore activé dans cette version, mais la structure est prête pour l'ajouter ensuite.

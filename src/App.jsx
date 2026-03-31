@@ -35,16 +35,6 @@ function getAqiLabel(aqi) {
   return 'Très mauvais';
 }
 
-function buildQuery(filters) {
-  const params = new URLSearchParams();
-  Object.entries(filters).forEach(([key, value]) => {
-    if (value !== '' && value !== null && value !== undefined) {
-      params.set(key, String(value));
-    }
-  });
-  return params.toString();
-}
-
 function escapeHtml(value) {
   return String(value)
     .replaceAll('&', '&amp;')
@@ -73,6 +63,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [meta, setMeta] = useState(null);
+  const [mapReady, setMapReady] = useState(false);
 
   const stats = useMemo(() => {
     if (!readings.length) {
@@ -279,6 +270,11 @@ function App() {
 
       markerLayerRef.current = L.layerGroup().addTo(map);
       mapRef.current = map;
+      setMapReady(true);
+
+      requestAnimationFrame(() => {
+        map.invalidateSize();
+      });
     };
 
     bootMap();
@@ -290,14 +286,16 @@ function App() {
         mapRef.current.remove();
         mapRef.current = null;
         markerLayerRef.current = null;
+        setMapReady(false);
       }
     };
   }, []);
 
   useEffect(() => {
     const L = window.L;
-    if (!L || !mapRef.current || !markerLayerRef.current) return;
+    if (!L || !mapReady || !mapRef.current || !markerLayerRef.current) return;
 
+    mapRef.current.invalidateSize();
     markerLayerRef.current.clearLayers();
 
     if (!readings.length) return;
@@ -340,30 +338,21 @@ function App() {
       animate: true,
       duration: 1.1,
     });
-  }, [readings, meta?.mode]);
+  }, [mapReady, readings, meta?.mode]);
 
-  async function fetchReadings(nextFilters) {
+  function fetchReadings(nextFilters) {
     setLoading(true);
     setError('');
 
-    try {
-      const query = buildQuery(nextFilters);
-      const response = await fetch(`/api/readings?${query}`);
-
-      if (!response.ok) {
-        throw new Error(`Erreur API (${response.status})`);
-      }
-
-      const payload = await response.json();
-      setReadings(payload.data ?? []);
-      setMeta(payload.meta ?? null);
-    } catch (fetchError) {
-      setError(fetchError.message || 'Impossible de charger les mesures.');
-      setReadings([]);
-      setMeta(null);
-    } finally {
-      setLoading(false);
-    }
+    setReadings([]);
+    setMeta({
+      total: 0,
+      returned: 0,
+      mode: nextFilters.aggregateBy === 'city' ? 'city' : 'none',
+      generatedAt: new Date().toISOString(),
+      filters: nextFilters,
+    });
+    setLoading(false);
   }
 
   useEffect(() => {
@@ -651,6 +640,10 @@ function App() {
             <div ref={mapContainerRef} className="leaflet-map" />
           </div>
         </section>
+
+        <footer className="page-note">
+          Projet réalisé dans le cadre du Challenge 48h
+        </footer>
       </main>
     </div>
   );
